@@ -1,7 +1,7 @@
 # Activate device downgraded on ios 16 / 17 sep
 # Disclamer
-This script is for educational purposes. I am aware people might use this to bypass iCloud, but I am NOT encouraging you to bypass iCloud and you **shouldn't do that**. This guide is **legitimately** activating it!
-ALSO: This script is for advanced users, i am not responsible if your device becomes broken (idk how but just in case) or if your known_hosts get reseted. **If you have important saved hosts in known_hosts file save them manually (script already saves it but this is just in case).**
+If you break your device its your responsibility but you can just fix it by restoring it. 
+I am not responsible for data loss if you bork something up.
 
 You can use palen1x if palera1n does not work properly.
 
