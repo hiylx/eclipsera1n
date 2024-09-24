@@ -1,7 +1,7 @@
 #!/bin/bash
 
 skip_rdboot=false
-
+unameOut="$(uname -s)"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --skip-rdboot)
@@ -102,7 +102,7 @@ else
 
     if [ "$installsshrd" = "y" ]; then
         echo " [*] Cloning SSHRD_Script... Please wait!"
-        git clone https://github.com/verygenericname/SSHRD_Script --recursive
+        git clone https://github.com/hiylx/SSHRD_Script.git --recursive
         cd "$script_path/SSHRD_Script" && git pull
 
     else
@@ -112,14 +112,14 @@ else
 fi
 
 if [ ! -f "$script_path/sshpass" ]; then
-    cp "$script_path/SSHRD_Script/Darwin/sshpass" "$script_path/"
+    cp "$script_path/SSHRD_Script/$unameOut/sshpass" "$script_path/"
     printg "[*] Copying sshpass to script path (Will be needed for later)"
 else
     cd $script_path
 fi
 
 if [ ! -f "$script_path/iproxy" ]; then
-    cp "$script_path/SSHRD_Script/Darwin/iproxy" "$script_path/"
+    cp "$script_path/SSHRD_Script/$unameOut/iproxy" "$script_path/"
     printg "[*] Copying iproxy to script path (Will be needed for later)"
 
 else
@@ -143,15 +143,28 @@ fi
 printg "[*] You might have to press allow for opening new terminal window"
 
 if [ "$skip_rdboot" = true ]; then
-    printg "[*] Terminal window with ssh should already be opened"
+    printg "[*] Terminal window with ssh should already be opened if you are on mac"
 else
-  osascript -e "tell application \"Terminal\" to do script \"cd $script_path/SSHRD_Script && ./sshrd.sh ssh\""
+  sleep 4
+  case "${unameOut}" in
+    Linux*)     machine=Linux;;
+    Darwin*)    osascript -e "tell application \"Terminal\" to do script \"cd $script_path/SSHRD_Script && ./sshrd.sh ssh\"";;
+    CYGWIN*)    machine=Cygwin;;
+    MINGW*)     machine=MinGw;;
+    MSYS_NT*)   machine=Git;;
+    *)          machine="UNKNOWN:${unameOut}"
+   esac
+  
 fi
 
-printr "[!] Do not close it, and make sure that ssh is successfully connected!"
+printr "[!] Do not close it, and make sure that ssh is successfully connected! And if you are using GNU/Linux you should open a new terminal and manually run the command below"
+printg  "sudo su root -c 'cd $script_path/SSHRD_Script && ./sshrd.sh ssh"
 printg "[*] Press enter when everything is ready. "
 read rdbready
 
+cd $script_path			
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mount_filesystems
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 rm -rf /mnt2/mobile/Library/FairPlay/
 printg "[*] Deleting previous activation files"
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 rm -rf /mnt2/mobile/Media/Downloads/1
 sleep 1
@@ -159,13 +172,13 @@ sleep 1
 sleep 1
 
 printg "[*] Making directory /mnt2/mobile/Media/Downloads/1"
-./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mkdir /mnt2/mobile/Media/Downloads/1
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mkdir -p /mnt2/mobile/Media/Downloads/1
 sleep 1
 
 printg "[*] Transfering Activation folder to /mnt2/mobile/Media/Downloads/1, make sure that Activation folder is located in Script Path! "
 printg "[*] Press enter when done checking!"
 read checkifactivationfolder
-./sshpass -p alpine scp -rP 2222 -o StrictHostKeyChecking=no ~/$script_path/Activation root@localhost:/mnt2/mobile/Media/Downloads/1
+./sshpass -p alpine scp -rP 2222 -o StrictHostKeyChecking=no $script_path/Activation root@localhost:/mnt2/mobile/Media/Downloads/1
 sleep 1
 
 printg "[*] Moving activation files to /mnt2/mobile/Media/1"
@@ -173,7 +186,7 @@ printg "[*] Moving activation files to /mnt2/mobile/Media/1"
 sleep 3
 
 printg "[*] Fixing permisions of activation folder"
-./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 chown -R mobile:mobile /mnt2/mobile/Media/1
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 $(which chown) -R mobile:mobile /mnt2/mobile/Media/1
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 chmod -R 755 /mnt2/mobile/Media/1
 sleep 1
 
@@ -203,7 +216,8 @@ echo $ACT1
 ACT2=${ACT1%?????????????????}
 sleep 1
 printg "[*] activation_records: "
-echo $ACT2 ACT3=$ACT2/Library/internal/data_ark.plist
+echo $ACT2 
+ACT3=$ACT2/Library/internal/data_ark.plist
 
 printg "[*] Setting permissions of data_ark.plist"
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 chflags nouchg $ACT3 
@@ -222,6 +236,7 @@ sleep 1
 ACT4=$ACT2/Library/activation_records 
 
 printg "[*] Making directory activation_records"
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 rm -rf $ACT4 
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mkdir $ACT4 
 sleep 2
 
@@ -241,7 +256,7 @@ sleep 1
 sleep 5
 
 printg "[*] Repairing permissions"
-./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 chown root:mobile /mnt2/wireless/Library/Preferences/com.apple.commcenter.device_specific_nobackup.plist 
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 $(which chown) root:mobile /mnt2/wireless/Library/Preferences/com.apple.commcenter.device_specific_nobackup.plist 
 sleep 1
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 chmod 755 /mnt2/wireless/Library/Preferences/com.apple.commcenter.device_specific_nobackup.plist 
 sleep 1
