@@ -3,7 +3,8 @@
 If you break your device its your responsibility but you can just fix it by restoring it. 
 I am not responsible for data loss if you bork something up.
 This was not tested on ios 17 sep
-#Also do not use this script yet it is UNDER DEVELOPMENT and NOT COMPLETE 
+
+# Also do not use this script yet it is UNDER DEVELOPMENT and NOT COMPLETE 
 
 You can use palen1x if palera1n does not work properly.
 
