@@ -81,34 +81,11 @@ chmod +x "$script_path"/SSHRD_Script/Darwin/sshpass
 rm -rf ${HOME}/.ssh/known_hosts
 
 if [ "$skip_rdboot" = true ]; then
-    printg "[*] Make sure to create ramdisk for your version if you haven't used futurerestored.sh!"
+    printg "[*] User has chosen to skip sshrd boot, make sure to boot sshrd on your device and run mount_filesystems"
 else
     printg "[?] What version is your iDevice on?"
     read ios1
     printg
-fi
-
-if [ -d "$script_path/SSHRD_Script" ]; then
-    printg " [*] SSHRD_Script exists in the script's directory."
-    cd "$script_path/SSHRD_Script" && git pull
-
-else
-    echo -e "\033[1;31m[!] The folder SSHRD_Script does not exist in the script's directory. Exiting the program. \033[0m"
-    echo -e "\033[1;31m[!] This tool depends on SSHRD_Script by Nathan. \033[0m"
-    echo
-
-    printg "[?] Do you want to install it now? (y/n)"
-    read installsshrd
-
-    if [ "$installsshrd" = "y" ]; then
-        echo " [*] Cloning SSHRD_Script... Please wait!"
-        git clone https://github.com/hiylx/SSHRD_Script.git --recursive
-        cd "$script_path/SSHRD_Script" && git pull
-
-    else
-        echo -e "\033[1;31m[!] Exit code: 100 \033[0m"
-        exit 100
-    fi
 fi
 
 if [ ! -f "$script_path/sshpass" ]; then
@@ -185,8 +162,10 @@ printg "[*] Moving activation files to /mnt2/mobile/Media/1"
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mv -f /mnt2/mobile/Media/Downloads/1 /mnt2/mobile/Media
 sleep 3
 
+chown_path=$(./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 which chown)
+
 printg "[*] Fixing permisions of activation folder"
-./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 $(which chown) -R mobile:mobile /mnt2/mobile/Media/1
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 $chown_path -R mobile:mobile /mnt2/mobile/Media/1
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 chmod -R 755 /mnt2/mobile/Media/1
 sleep 1
 
@@ -256,7 +235,7 @@ sleep 1
 sleep 5
 
 printg "[*] Repairing permissions"
-./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 $(which chown) root:mobile /mnt2/wireless/Library/Preferences/com.apple.commcenter.device_specific_nobackup.plist 
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 $chown_path root:mobile /mnt2/wireless/Library/Preferences/com.apple.commcenter.device_specific_nobackup.plist
 sleep 1
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 chmod 755 /mnt2/wireless/Library/Preferences/com.apple.commcenter.device_specific_nobackup.plist 
 sleep 1
