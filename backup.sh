@@ -118,7 +118,9 @@ else
 fi
 
 printg " [*] Downloading com.apple.commcenter.device_specific_nobackup.plist "
-./sshpass -p "$termpw" sftp -oPort=2222 mobile@$devip:/private/var/wireless/Library/Preferences/com.apple.commcenter.device_specific_nobackup.plist "$script_path/Activation"
+echo ./sshpass -p "$termpw" ssh -o StrictHostKeyChecking=no mobile@$devip sudo su root -c 'cp /private/var/wireless/Library/Preferences/com.apple.commcenter.device_specific_nobackup.plist /private/var/containers/Data/System/'
+./sshpass -p "$termpw" ssh -o StrictHostKeyChecking=no mobile@$devip sudo su root -c 'cp /private/var/wireless/Library/Preferences/com.apple.commcenter.device_specific_nobackup.plist /private/var/containers/Data/System/'
+./sshpass -p "$termpw" sftp -oPort=2222 StrictHostKeyChecking=no mobile@$devip:/private/var/containers/Data/System/com.apple.commcenter.device_specific_nobackup.plist "$script_path/Activation"
 
 if [ -e "$script_path/Activation/com.apple.commcenter.device_specific_nobackup.plist" ]; then
     printg " [*] com.apple.commcenter.device_specific_nobackup.plist downloaded successfully"
