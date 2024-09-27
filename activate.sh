@@ -29,9 +29,6 @@ printr() {
   echo -e "\033[1;31m$1\033[0m"
 }
 
-printg "[*] Reseting known_hosts. Make sure to backup it manually before running this script if it is important!"
-printr "[!] Press enter when ready to continue! "
-read readytocontinue1
 
 if [ -d "$script_path/knownhosts" ]; then
     cd $script_path
@@ -130,32 +127,33 @@ else
 fi
 
 printr "[!] Do not close it, and make sure that ssh is successfully connected! And if you are using Linux you should open a new terminal and manually run the command below"
-printg  "sudo su root -c 'cd $script_path/SSHRD_Script && ./sshrd.sh ssh"
+printg  "sudo su root -c 'cd $script_path/SSHRD_Script && ./sshrd.sh ssh'"
 printg "[*] Press enter when everything is ready. "
 read rdbready
 
 cd $script_path			
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mount_filesystems
+
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 rm -rf /mnt2/mobile/Library/FairPlay/
-printg "[*] Deleting previous activation files"
+
+printg "[*] Deleting previous activation files (If this errors it is okay)"
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 rm -rf /mnt2/mobile/Media/Downloads/1
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 rm -rf /mnt2/mobile/Media/1
 
 printg "[*] Making directory /mnt2/mobile/Media/Downloads/1"
-./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mkdir -p /mnt2/mobile/Media/Downloads/1
-
-printg "[*] Transfering Activation folder to /mnt2/mobile/Media/Downloads/1, make sure that Activation folder is located in Script Path! "
-printg "[*] Press enter when done checking!"
-read checkifactivationfolder
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mkdir -p /mnt2/mobile/Media/Downloads/1/Activation
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mkdir -p /mnt2/mobile/Media/
+printg "[*] Pushing Activation files"
 ./sshpass -p alpine scp -rP 2222 -o StrictHostKeyChecking=no $script_path/Activation root@localhost:/mnt2/mobile/Media/Downloads/1
+sleep 1
 
 printg "[*] Moving activation files to /mnt2/mobile/Media/1"
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mv -f /mnt2/mobile/Media/Downloads/1 /mnt2/mobile/Media
 
-chown_path=$(./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 which chown)
+chown_path="/usr/sbin/chown"
 
 printg "[*] Fixing permisions of activation folder"
-./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 $chown_path -R mobile:mobile /mnt2/mobile/Media/1
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 "$chown_path" -R mobile:mobile /mnt2/mobile/Media/1
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 chmod -R 755 /mnt2/mobile/Media/1
 
 printg "[*] Fixing permissions of all activation files"
@@ -217,7 +215,7 @@ printg "[*] Repairing permissions"
 
 
 printg "[*] Rebooting"
-./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 reboot
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 /sbin/reboot
 
 
 printg "[*] Script done, your device should be in homescreen"
