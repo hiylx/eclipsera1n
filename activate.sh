@@ -202,6 +202,6 @@ if [ -f "$script_path/knownhosts/known_hosts" ]; then
 fi
 
 
-printg "[*] All done! Enjoy iOS 15."
+printg "[*] All done! Enjoy!"
 
 exit 1
