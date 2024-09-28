@@ -196,11 +196,8 @@ printg "[*] Rebooting"
 printg "[*] Script done, your device should be reboot and you can go through setup like normal"
 printg "[*] Your device will work like normal but for you can only use trollstore for side loading. If you want to install it you can check out the trollstore guide"
 
-if [ -f $script_path/knownhosts/known_hosts ]
 printg " [*] Restoring known_hosts file"
 cd $script_path/knownhosts && cp "$script_path/knownhosts/known_hosts" "${HOME}/.ssh/known_hosts"
-fi
-
 
 
 printg "[*] All done! Enjoy iOS 15."
