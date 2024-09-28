@@ -36,38 +36,22 @@ else
     cd $script_path && mkdir knownhosts
 fi
 
-if [ ! -f "$script_path/knownhosts/known_hosts" ]; then
-    printr "[!] Known hosts aren't saved in $script_path/knownhosts"
+if [ -f "${HOME}/.ssh/known_hosts" ]; then
+    printg "[*] Automatically getting hosts file location and copying it to script path"
 
-    printg "[?] Do you want to save them manually or should script automatically save them? (m/a)"
-    read savehosts
+    cd $script_path && cp "${HOME}/.ssh/known_hosts" "$script_path/"
 
-    if [ "$savehosts" = "a" ]; then
-      printg "[*] Automatically getting hosts file location and copying it to script path"
+    cd $script_path && cp "$script_path/known_hosts" "$script_path/knownhosts/"  
 
-      cd $script_path && cp "${HOME}/.ssh/known_hosts" "$script_path/"
+    printg "[*] Please check if known_hosts file exists in /knownhosts folder. If it doesn't copy it by yourself!"
+    printg "[*] When you finish checking press enter"
 
-      cd $script_path && cp "$script_path/known_hosts" "$script_path/knownhosts/"  
+    printg "[*] Files in /.ssh directory are: "
+    cd ${HOME}/.ssh/ && ls
 
-      printg "[*] Please check if known_hosts file exists in /knownhosts folder. If it doesn't copy it by yourself!"
-      printg "[*] When you finish checking press enter"
+    read donecheckinghostsidk
 
-      printg "[*] Files in /.ssh directory are: "
-      cd ${HOME}/.ssh/ && ls
-
-      read donecheckinghostsidk
-
-      rm -rf ${HOME}/.ssh/known_hosts
-
-    else
-        printg "[*] Save known_hosts manually. Script will sleep for 60 seconds. "
-        printg "[*] Also it is located in /Users/username/.ssh/known_hosts"
-        printg "[*] Press enter when you are done."
-        read donesavinghostsidkyes
-    fi
-
-else
-    printg "[*] Known_hosts file is already saved."
+    rm -rf ${HOME}/.ssh/known_hosts
 fi
 
 chmod +x "$script_path"/SSHRD_Script/Darwin/sshpass
@@ -97,7 +81,6 @@ else
 fi
 
 printg "[*] Creating Ramdisk, make sure that your iDevice is in DFU mode"
-printg "[*] If it isn't do palera1n --dfuhelper in another terminal window."
 
 
 if [ "$skip_rdboot" = true ]; then
@@ -134,16 +117,17 @@ read rdbready
 cd $script_path			
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mount_filesystems
 
-./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 rm -rf /mnt2/mobile/Library/FairPlay/
-
 printg "[*] Deleting previous activation files (If this errors it is okay)"
+
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 rm -rf /mnt2/mobile/Library/FairPlay/
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 rm -rf /mnt2/mobile/Media/Downloads/1
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 rm -rf /mnt2/mobile/Media/1
 
 printg "[*] Making directory /mnt2/mobile/Media/Downloads/1"
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mkdir -p /mnt2/mobile/Media/Downloads/1/Activation
-./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mkdir -p /mnt2/mobile/Media/
-printg "[*] Pushing Activation files"
+printg "[*] Making directory /mnt2/mobile/Media/1"
+./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 mkdir -p /mnt2/mobile/Media/1
+printg "[*] Pushing Activation files to /mnt2/mobile/Media/Downloads/1"
 ./sshpass -p alpine scp -rP 2222 -o StrictHostKeyChecking=no $script_path/Activation root@localhost:/mnt2/mobile/Media/Downloads/1
 sleep 1
 
@@ -171,12 +155,9 @@ printg "[*] Finding internal folder"
 ACT1=$(./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 find /mnt2/containers/Data/System -name internal) 
 ACT2=$(./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 find /mnt2/containers/Data/System -name activation_records) 
 
-printg "[*] Internal folder: "
-echo $ACT1 
 
 ACT2=${ACT1%?????????????????}
-printg "[*] activation_records: "
-echo $ACT2 
+
 ACT3=$ACT2/Library/internal/data_ark.plist
 
 printg "[*] Setting permissions of data_ark.plist"
@@ -218,19 +199,13 @@ printg "[*] Rebooting"
 ./sshpass -p alpine ssh -o StrictHostKeyChecking=no root@localhost -p 2222 /sbin/reboot
 
 
-printg "[*] Script done, your device should be in homescreen"
-printg "[*] You can sign in into iCloud now, also if you set passcode you will have to restore if you want to jailbreak with Palera1n again"
+printg "[*] Script done, your device should be reboot and you can go through setup like normal"
+printg "[*] Your device will work like normal but for you can only use trollstore for side loading. If you want to install it you can check out the trollstore guide"
 
 
 printg " [*] Restoring known_hosts file"
 cd $script_path/knownhosts && cp "$script_path/knownhosts/known_hosts" "${HOME}/.ssh/known_hosts"
 
-
-printg " [!] known_hosts should be copied to ${HOME}/.ssh/known_hosts, Please check if they are in there"
-
-printg " [!] Files in .ssh directory are: "
-
-cd ${HOME}/.ssh/ && ls
 
 
 printg "[*] All done! Enjoy iOS 15."
