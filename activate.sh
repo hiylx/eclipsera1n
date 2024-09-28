@@ -43,13 +43,7 @@ if [ -f "${HOME}/.ssh/known_hosts" ]; then
 
     cd $script_path && cp "$script_path/known_hosts" "$script_path/knownhosts/"  
 
-    printg "[*] Please check if known_hosts file exists in /knownhosts folder. If it doesn't copy it by yourself!"
-    printg "[*] When you finish checking press enter"
-
-    printg "[*] Files in /.ssh directory are: "
-    cd ${HOME}/.ssh/ && ls
-
-    read donecheckinghostsidk
+    
 
     rm -rf ${HOME}/.ssh/known_hosts
 fi
@@ -202,9 +196,10 @@ printg "[*] Rebooting"
 printg "[*] Script done, your device should be reboot and you can go through setup like normal"
 printg "[*] Your device will work like normal but for you can only use trollstore for side loading. If you want to install it you can check out the trollstore guide"
 
-
+if [ -f $script_path/knownhosts/known_hosts ]
 printg " [*] Restoring known_hosts file"
 cd $script_path/knownhosts && cp "$script_path/knownhosts/known_hosts" "${HOME}/.ssh/known_hosts"
+fi
 
 
 
